@@ -47,7 +47,7 @@ ci-docker-auth:
 
 ci-docker-build:
 	@docker build --rm \
-		--build-arg SERVICE=$(SERVICE)
+		--build-arg SERVICE=$(SERVICE) \
 		--tag $(DOCKER_REPOSITORY):$(SHA8) \
 		--tag $(DOCKER_REPOSITORY):latest .
 
