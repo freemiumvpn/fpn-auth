@@ -15,7 +15,7 @@ lint:
 
 BUILDENV := CGO_ENABLED=0
 TESTFLAGS := -short -cover
-SERVICE ?= $(base_dir)
+SERVICE=fpn-auth
 
 .PHONY: test
 test:
@@ -24,7 +24,7 @@ test:
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build $(SERVICE)
+	CGO_ENABLED=0 go build -o $(SERVICE)
 
 
 .PHONY: dev
@@ -32,20 +32,22 @@ dev:
 	go run .
 
 DOCKER_REGISTRY=freemiumvpn
-DOCKER_CONTAINER_NAME=fpn-auth
+DOCKER_CONTAINER_NAME=$(SERVICE)
 DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 SHA8=$(shell echo $(GITHUB_SHA) | cut -c1-8)
 
 docker-image:
 	docker build --rm \
-		--tag $(DOCKER_REPOSITORY):local . \
-		--build-arg SERVICE=$(SERVICE)
+		--build-arg SERVICE=$(SERVICE) \
+		--tag $(DOCKER_REPOSITORY):local .
+		
 
 ci-docker-auth:
 	@echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
 
 ci-docker-build:
 	@docker build --rm \
+		--build-arg SERVICE=$(SERVICE)
 		--tag $(DOCKER_REPOSITORY):$(SHA8) \
 		--tag $(DOCKER_REPOSITORY):latest .
 

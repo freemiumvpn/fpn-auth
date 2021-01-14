@@ -4,22 +4,26 @@ ARG SERVICE
 
 RUN apk update && apk add make git
 
-WORKDIR /go/src/github.com/freemiumvpn/${SERVICE}
+WORKDIR /go/src/github.com/freemiumvpn/${SERVICE}/
 
-ADD go.sum go.mod Makefile /go/src/github.com/freemiumvpn/${SERVICE}
+ADD go.sum go.mod Makefile /go/src/github.com/freemiumvpn/${SERVICE}/
 RUN make install
 
-ADD . /go/src/github.com/freemiumvpn/${SERVICE}
+ADD . /go/src/github.com/freemiumvpn/${SERVICE}/
 
 RUN make test
 RUN make build
+RUN mv ./${SERVICE} /${SERVICE}
 
 FROM alpine:3.10 AS STAGE_SERVE
 
+RUN apk update
+
 ARG SERVICE
 
-RUN mkdir /app
+WORKDIR /work_dir
 
-COPY --from=STAGE_BUILD /go/src/github.com/freemiumvpn/${SERVICE} /app/$SERVICE
 
-ENTRYPOINT /app/$SERVICE
+COPY --from=STAGE_BUILD /${SERVICE} /work_dir/service
+
+ENTRYPOINT /work_dir/service
